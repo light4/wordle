@@ -1,3 +1,4 @@
+use crate::world::{CharacterState, World};
 use eframe::{egui, epi};
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -6,10 +7,7 @@ use eframe::{egui, epi};
 pub struct TemplateApp {
     // Example stuff:
     label: String,
-
-    // this how you opt-out of serialization of a member
-    #[cfg_attr(feature = "persistence", serde(skip))]
-    value: f32,
+    world: World,
 }
 
 impl Default for TemplateApp {
@@ -17,7 +15,7 @@ impl Default for TemplateApp {
         Self {
             // Example stuff:
             label: "Hello World!".to_owned(),
-            value: 2.7,
+            world: World::new("hello".to_owned(), "qwertyuiopasdfghjklzxcvbnm".to_owned()),
         }
     }
 }
@@ -52,7 +50,7 @@ impl epi::App for TemplateApp {
     /// Called each time the UI needs repainting, which may be many times per second.
     /// Put your widgets into a `SidePanel`, `TopPanel`, `CentralPanel`, `Window` or `Area`.
     fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
-        let Self { label, value } = self;
+        let Self { label, world } = self;
 
         // Examples of how to create different panels and windows.
         // Pick whichever suits you.
@@ -70,17 +68,104 @@ impl epi::App for TemplateApp {
             });
         });
 
+        let characters = world.characters.clone();
+        let grid = world.grid.clone();
+        let origin_label = label.clone();
+
         egui::SidePanel::left("side_panel").show(ctx, |ui| {
             ui.heading("Side Panel");
 
+            ui.label(&origin_label);
+
+            for i in 0..grid.len() {
+                ui.horizontal(|ui| {
+                    for j in 0..grid[i].len() {
+                        let item = grid[i][j];
+                        let s = String::from(item.inner).to_uppercase();
+                        match item.state {
+                            CharacterState::Right => {
+                                ui.label(
+                                    egui::RichText::new(s)
+                                        .color(egui::Color32::WHITE)
+                                        .background_color(egui::Color32::DARK_GREEN),
+                                );
+                            }
+                            CharacterState::WrongPos => {
+                                ui.label(
+                                    egui::RichText::new(s)
+                                        .color(egui::Color32::WHITE)
+                                        .background_color(egui::Color32::KHAKI),
+                                );
+                            }
+                            CharacterState::Wrong => {
+                                ui.label(
+                                    egui::RichText::new(s)
+                                        .color(egui::Color32::WHITE)
+                                        .background_color(egui::Color32::DARK_GRAY),
+                                );
+                            }
+                            CharacterState::Untouch => {
+                                ui.label(
+                                    egui::RichText::new("   ".to_owned())
+                                        .background_color(egui::Color32::WHITE),
+                                );
+                            }
+                            CharacterState::Buffer => {
+                                ui.label(
+                                    egui::RichText::new(s)
+                                        .color(egui::Color32::BLACK)
+                                        .background_color(egui::Color32::WHITE),
+                                );
+                            }
+                        }
+                    }
+                });
+            }
+
             ui.horizontal(|ui| {
-                ui.label("Write something: ");
-                ui.text_edit_singleline(label);
+                ui.spacing_mut().item_spacing.x = 5.0;
+                for c in &characters[0..10] {
+                    if ui.button(String::from(c.inner).to_uppercase()).clicked() {
+                        world.input_char(c.inner);
+                        dbg!(c);
+                    };
+                }
             });
 
-            ui.add(egui::Slider::new(value, 0.0..=10.0).text("value"));
-            if ui.button("Increment").clicked() {
-                *value += 1.0;
+            ui.horizontal(|ui| {
+                ui.add_space(10.0);
+                ui.spacing_mut().item_spacing.x = 5.0;
+                for c in &characters[10..19] {
+                    if ui.button(String::from(c.inner).to_uppercase()).clicked() {
+                        world.input_char(c.inner);
+                        dbg!(c);
+                    };
+                }
+            });
+
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = 5.0;
+                if ui.button("Enter").clicked() {
+                    match world.enter() {
+                        Ok(_) => self.label = "good".to_string(),
+                        Err(e) => self.label = e.to_string(),
+                    };
+                    dbg!(&world);
+                }
+                for c in &characters[19..] {
+                    if ui.button(String::from(c.inner).to_uppercase()).clicked() {
+                        world.input_char(c.inner);
+                        dbg!(c);
+                    };
+                }
+                if ui.button("DEL").clicked() {
+                    world.delete_char();
+                    dbg!("DEL");
+                }
+            });
+
+            if ui.button("DEBUG").clicked() {
+                dbg!(&world);
             }
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
