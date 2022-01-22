@@ -1,4 +1,5 @@
 use crate::world::{CharacterState, World};
+use eframe::egui::Button;
 use eframe::{egui, epi};
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -125,7 +126,24 @@ impl epi::App for TemplateApp {
             ui.horizontal(|ui| {
                 ui.spacing_mut().item_spacing.x = 5.0;
                 for c in &characters[0..10] {
-                    if ui.button(String::from(c.inner).to_uppercase()).clicked() {
+                    let s = String::from(c.inner).to_uppercase();
+                    let button = match c.state {
+                        CharacterState::Right => {
+                            Button::new(egui::RichText::new(s).color(egui::Color32::WHITE))
+                                .fill(egui::Color32::DARK_GREEN)
+                        }
+                        CharacterState::WrongPos => {
+                            Button::new(egui::RichText::new(s).color(egui::Color32::WHITE))
+                                .fill(egui::Color32::KHAKI)
+                        }
+                        CharacterState::Wrong => {
+                            Button::new(egui::RichText::new(s).color(egui::Color32::WHITE))
+                                .fill(egui::Color32::DARK_GRAY)
+                        }
+                        _ => Button::new(egui::RichText::new(s).color(egui::Color32::BLACK))
+                            .fill(egui::Color32::LIGHT_GRAY),
+                    };
+                    if ui.add(button).clicked() {
                         world.input_char(c.inner);
                         dbg!(c);
                     };
@@ -136,7 +154,24 @@ impl epi::App for TemplateApp {
                 ui.add_space(10.0);
                 ui.spacing_mut().item_spacing.x = 5.0;
                 for c in &characters[10..19] {
-                    if ui.button(String::from(c.inner).to_uppercase()).clicked() {
+                    let s = String::from(c.inner).to_uppercase();
+                    let button = match c.state {
+                        CharacterState::Right => {
+                            Button::new(egui::RichText::new(s).color(egui::Color32::WHITE))
+                                .fill(egui::Color32::DARK_GREEN)
+                        }
+                        CharacterState::WrongPos => {
+                            Button::new(egui::RichText::new(s).color(egui::Color32::WHITE))
+                                .fill(egui::Color32::KHAKI)
+                        }
+                        CharacterState::Wrong => {
+                            Button::new(egui::RichText::new(s).color(egui::Color32::WHITE))
+                                .fill(egui::Color32::DARK_GRAY)
+                        }
+                        _ => Button::new(egui::RichText::new(s).color(egui::Color32::BLACK))
+                            .fill(egui::Color32::LIGHT_GRAY),
+                    };
+                    if ui.add(button).clicked() {
                         world.input_char(c.inner);
                         dbg!(c);
                     };
@@ -145,20 +180,46 @@ impl epi::App for TemplateApp {
 
             ui.horizontal(|ui| {
                 ui.spacing_mut().item_spacing.x = 5.0;
-                if ui.button("Enter").clicked() {
+
+                let enter_button =
+                    Button::new(egui::RichText::new("Enter").color(egui::Color32::BLACK))
+                        .fill(egui::Color32::LIGHT_GRAY);
+                if ui.add(enter_button).clicked() {
                     match world.enter() {
                         Ok(_) => self.label = "good".to_string(),
                         Err(e) => self.label = e.to_string(),
                     };
                     dbg!(&world);
                 }
+
                 for c in &characters[19..] {
-                    if ui.button(String::from(c.inner).to_uppercase()).clicked() {
+                    let s = String::from(c.inner).to_uppercase();
+                    let button = match c.state {
+                        CharacterState::Right => {
+                            Button::new(egui::RichText::new(s).color(egui::Color32::WHITE))
+                                .fill(egui::Color32::DARK_GREEN)
+                        }
+                        CharacterState::WrongPos => {
+                            Button::new(egui::RichText::new(s).color(egui::Color32::WHITE))
+                                .fill(egui::Color32::KHAKI)
+                        }
+                        CharacterState::Wrong => {
+                            Button::new(egui::RichText::new(s).color(egui::Color32::WHITE))
+                                .fill(egui::Color32::DARK_GRAY)
+                        }
+                        _ => Button::new(egui::RichText::new(s).color(egui::Color32::BLACK))
+                            .fill(egui::Color32::LIGHT_GRAY),
+                    };
+                    if ui.add(button).clicked() {
                         world.input_char(c.inner);
                         dbg!(c);
                     };
                 }
-                if ui.button("DEL").clicked() {
+
+                let del_button =
+                    Button::new(egui::RichText::new("DEL").color(egui::Color32::BLACK))
+                        .fill(egui::Color32::LIGHT_GRAY);
+                if ui.add(del_button).clicked() {
                     world.delete_char();
                     dbg!("DEL");
                 }

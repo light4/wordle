@@ -89,6 +89,11 @@ impl World {
                 }
             } else {
                 self.grid[self.cursor.0][idx].state = CharacterState::Wrong;
+                for i in self.characters.iter_mut() {
+                    if i.inner == c {
+                        i.state = CharacterState::Wrong;
+                    }
+                }
             }
         }
         self.cursor.0 += 1;
