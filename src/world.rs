@@ -1,6 +1,7 @@
 use crate::error::InputError;
 use anyhow::{bail, Result};
 use once_cell::sync::OnceCell;
+use rand::{self, prelude::SliceRandom};
 
 pub const LENGTH: usize = 5;
 
@@ -11,6 +12,14 @@ fn global_dict() -> &'static Vec<&'static str> {
             .split_whitespace()
             .collect::<Vec<&str>>()
     })
+}
+
+fn random_word() -> String {
+    let mut rng = rand::thread_rng();
+    global_dict()
+        .choose(&mut rng)
+        .expect("choose random word error")
+        .to_string()
 }
 
 #[derive(Debug, Clone)]
@@ -67,7 +76,19 @@ impl World {
         }
     }
 
-    pub fn enter(self: &mut Self) -> Result<()> {
+    pub fn default() -> Self {
+        Self::new(random_word(), "qwertyuiopasdfghjklzxcvbnm".to_owned())
+    }
+
+    pub fn reset(&mut self) {
+        let new = World::default();
+        self.result = new.result;
+        self.cursor = (0, 0);
+        self.grid = new.grid;
+        self.characters = new.characters;
+    }
+
+    pub fn enter(&mut self) -> Result<()> {
         let s = self.check_input()?;
 
         for (idx, c) in s.chars().enumerate() {
@@ -102,7 +123,7 @@ impl World {
         Ok(())
     }
 
-    pub fn input_char(self: &mut Self, input: char) {
+    pub fn input_char(&mut self, input: char) {
         let current = self.grid[self.cursor.0][self.cursor.1];
         // 当前指向的方格已经填了
         if (self.cursor.1 + 1) < LENGTH && current.state == CharacterState::Buffer {
@@ -111,14 +132,14 @@ impl World {
         self.grid[self.cursor.0][self.cursor.1] = Item::new(input, CharacterState::Buffer);
     }
 
-    pub fn delete_char(self: &mut Self) {
+    pub fn delete_char(&mut self) {
         self.grid[self.cursor.0][self.cursor.1] = Item::default();
         if self.cursor.1 > 0 {
             self.cursor.1 -= 1;
         }
     }
 
-    fn check_input(self: &Self) -> Result<String> {
+    fn check_input(&self) -> Result<String> {
         if (self.cursor.1 + 1) != LENGTH {
             bail!(InputError::NotEnoughLetters);
         }

@@ -16,7 +16,7 @@ impl Default for TemplateApp {
         Self {
             // Example stuff:
             label: "Hello World!".to_owned(),
-            world: World::new("hello".to_owned(), "qwertyuiopasdfghjklzxcvbnm".to_owned()),
+            world: World::default(),
         }
     }
 }
@@ -62,6 +62,9 @@ impl epi::App for TemplateApp {
             // The top panel is often a good place for a menu bar:
             egui::menu::bar(ui, |ui| {
                 ui.menu_button("File", |ui| {
+                    if ui.button("Reset").clicked() {
+                        world.reset();
+                    }
                     if ui.button("Quit").clicked() {
                         frame.quit();
                     }
