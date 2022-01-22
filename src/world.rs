@@ -22,6 +22,8 @@ fn random_word() -> String {
         .to_string()
 }
 
+#[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "persistence", serde(default))] // if we add new fields, give them default values when deserializing old state
 #[derive(Debug, Clone)]
 pub struct World {
     pub result: Vec<char>,
@@ -30,6 +32,7 @@ pub struct World {
     pub characters: Vec<Item>,
 }
 
+#[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CharacterState {
     Untouch,
@@ -39,6 +42,14 @@ pub enum CharacterState {
     Wrong,
 }
 
+impl Default for CharacterState {
+    fn default() -> Self {
+        Self::Untouch
+    }
+}
+
+#[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "persistence", serde(default))] // if we add new fields, give them default values when deserializing old state
 #[derive(Debug, Clone, Copy)]
 pub struct Item {
     pub inner: char,
@@ -49,12 +60,20 @@ impl Item {
     fn new(inner: char, state: CharacterState) -> Self {
         Self { inner, state }
     }
+}
 
+impl Default for Item {
     fn default() -> Self {
         Self {
             inner: ' ',
             state: CharacterState::Untouch,
         }
+    }
+}
+
+impl Default for World {
+    fn default() -> Self {
+        Self::new(random_word(), "qwertyuiopasdfghjklzxcvbnm".to_owned())
     }
 }
 
@@ -68,16 +87,12 @@ impl World {
         Self {
             result: w.chars().collect(),
             cursor: (0, 0),
-            grid: grid,
+            grid,
             characters: characters
                 .chars()
                 .map(|c| Item::new(c, CharacterState::Untouch))
                 .collect(),
         }
-    }
-
-    pub fn default() -> Self {
-        Self::new(random_word(), "qwertyuiopasdfghjklzxcvbnm".to_owned())
     }
 
     pub fn reset(&mut self) {

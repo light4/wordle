@@ -81,10 +81,9 @@ impl epi::App for TemplateApp {
 
             ui.label(&origin_label);
 
-            for i in 0..grid.len() {
+            for row in grid {
                 ui.horizontal(|ui| {
-                    for j in 0..grid[i].len() {
-                        let item = grid[i][j];
+                    for item in row {
                         let s = String::from(item.inner).to_uppercase();
                         match item.state {
                             CharacterState::Right => {
