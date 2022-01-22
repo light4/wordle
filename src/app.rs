@@ -24,7 +24,7 @@ impl Default for TemplateApp {
 
 impl epi::App for TemplateApp {
     fn name(&self) -> &str {
-        "eframe template"
+        "Wordle"
     }
 
     /// Called once before the first frame.

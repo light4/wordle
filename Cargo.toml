@@ -1,9 +1,9 @@
 [package]
-name = "eframe_template"
+name = "wordle"
 version = "0.1.0"
-authors = ["Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"]
+authors = ["Light Ning<lightning1141@gmail.com>"]
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.58.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,13 +11,16 @@ rust-version = "1.56"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-eframe = "0.16.0" # Gives us egui, epi and web+native backends
+eframe = "0.16.0"
 
 serde = { version = "1", features = ["derive"], optional = true }
 
 [features]
 default = []
-persistence = ["eframe/persistence", "serde"] # Enable if you want to persist app state on shutdown
+persistence = [
+    "eframe/persistence",
+    "serde",
+] # Enable if you want to persist app state on shutdown
 
 [profile.release]
 opt-level = 2 # fast and small wasm
