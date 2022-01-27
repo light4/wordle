@@ -8,8 +8,9 @@ pub const LENGTH: usize = 5;
 fn global_dict() -> &'static Vec<&'static str> {
     static INSTANCE: OnceCell<Vec<&str>> = OnceCell::new();
     INSTANCE.get_or_init(|| {
-        include_str!("../assets/words.txt")
+        include_str!("../assets/wordlist.txt")
             .split_whitespace()
+            .filter(|w| w.is_ascii() && w.len() == LENGTH)
             .collect::<Vec<&str>>()
     })
 }
